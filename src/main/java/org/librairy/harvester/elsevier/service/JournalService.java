@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -30,14 +31,16 @@ public class JournalService {
     private final ElsevierRestClient elsevierClient;
     private final LibrairyRestClient librairyClient;
     private final ArticleService articleService;
+    private final PaperService paperService;
 
-    public JournalService(){
+    public JournalService(Boolean rethoricalAnalysisEnabled){
 
         this.elsevierClient = new ElsevierRestClient();
         this.librairyClient = new LibrairyRestClient();
 
         this.searchService  = new SearchService(elsevierClient);
         this.articleService = new ArticleService(elsevierClient);
+        this.paperService   = new PaperService(rethoricalAnalysisEnabled);
     }
 
 
@@ -66,18 +69,24 @@ public class JournalService {
                 List<String> docs = this.searchService.listEIDsBy(filterByJournal, size, index);
                 index += size;
 
-                docs.stream().forEach(eid -> {
-                    try{
+
+                docs.parallelStream().forEach( eid -> {
+                    try {
                         Article article = this.articleService.getByEID(eid);
 
-                        if (!Strings.isNullOrEmpty(article.getEid())){
+                        if (!Strings.isNullOrEmpty(article.getEid())) {
                             counter.incrementAndGet();
 
                             // create a document in librairy
                             librairyClient.createDocument(article.getEid(), article.getTitle(), article.getFullContent());
 
                             // create a part containing the abstract from article in librairy
-                            librairyClient.createPart("abs-"+article.getEid(), article.getEid(), article.getAbstractContent());
+                            librairyClient.createPart("abstract-" + article.getEid(), article.getEid(), article.getAbstractContent());
+
+
+                            for(Map.Entry<String,String> part : paperService.getParts(article.getEid(), article.getFullContent()).entrySet()){
+                                librairyClient.createPart(part.getKey()+"-" + article.getEid(), article.getEid(), part.getValue());
+                            }
 
                             // annotate the document with keywords
                             if (!article.getKeywords().isEmpty()) librairyClient.annotateDocument(article.getEid(), "keywords", article.getKeywords().stream().map(w -> w.replace(" ", "_")).collect(Collectors.joining(" ")));
@@ -86,14 +95,17 @@ public class JournalService {
                             librairyClient.addDocumentToDomain(article.getEid(), id);
 
                             // json serialize
-                            if (downloadFiles){
+                            if (downloadFiles) {
                                 String json = jsonMapper.writeValueAsString(article);
 
-                                Files.write(Paths.get(path.toString(), eid+".json"), json.getBytes());
+                                Files.write(Paths.get(path.toString(), eid + ".json"), json.getBytes());
                             }
-                            LOG.info("Article '" + eid + "' retrieved");
+                            LOG.info("Article '" + eid + "' from journal '" + id + "' retrieved");
 
                         }
+                        if (counter.get() >= maxDocs) return;
+                    }catch (RuntimeException e){
+                        LOG.warn(e.getMessage());
                     }catch (Exception e){
                         LOG.warn("Unexpected error",e);
                     }

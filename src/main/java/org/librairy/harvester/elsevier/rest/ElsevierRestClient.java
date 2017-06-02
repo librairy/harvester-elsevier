@@ -1,5 +1,6 @@
 package org.librairy.harvester.elsevier.rest;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.jayway.jsonpath.Predicate;
 import com.mashape.unirest.http.HttpResponse;
@@ -24,7 +25,14 @@ public class ElsevierRestClient {
     private final String baseUrl;
 
     public ElsevierRestClient(){
+
         this.baseUrl = "http://"+System.getProperty(API_HOST);
+
+        if (Strings.isNullOrEmpty(apiKey)) {
+            LOG.error("Environment variable: 'ELSEVIER_API_KEY'  not found!!!" );
+            throw new RuntimeException();
+        }
+
     }
 
 
@@ -36,7 +44,7 @@ public class ElsevierRestClient {
                                 "X-ELS-APIKey", apiKey))
                 .asString();
 
-        if (response.getStatus() != 200) throw new RuntimeException("Http error: " + response.getStatus());
+        if (response.getStatus() != 200) throw new RuntimeException("Http error: " + response.getStatus() + " by query: '" + query + "'");
 
         return response.getBody();
     }

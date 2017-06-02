@@ -43,9 +43,14 @@ public class LibrairyRestClient {
                 .body("{ \"name\": \""+name+"\", \"description\": \"created from elsevier-harvester\"}")
                 .asJson();
 
-        if (response.getStatus() != 201) throw new RuntimeException("Http error: " + response.getStatus());
+        if (response.getStatus() == 409){
+            LOG.warn("Domain already exists: " + id);
+        }else if (response.getStatus() != 201){
+            throw new RuntimeException("Http error: " + response.getStatus());
+        }else{
+            LOG.info("created a new domain in librairy: '" + id + "'");
+        }
 
-        LOG.info("created a new domain in librairy: '" + id + "'");
         return response.getBody().toString();
     }
 
@@ -60,11 +65,14 @@ public class LibrairyRestClient {
                 .body("{ \"name\": \""+StringEscapeUtils.escapeJson(name)+"\", \"content\": \""+StringEscapeUtils.escapeJson(content)+"\", \"language\": \"en\"}")
                 .asString();
 
-        if ((response.getStatus() != 200) && (response.getStatus() != 201)){
+        if ((response.getStatus() == 409)){
+            LOG.warn("Document already exists: " + id);
+        }else if ((response.getStatus() != 200) && (response.getStatus() != 201)){
             throw new RuntimeException("Http error: " + response.getStatus());
+        }else{
+            LOG.info("created a new document in librairy: '" + id + "'");
         }
 
-        LOG.info("created a new document in librairy: '" + id + "'");
         return response.getBody();
     }
 
@@ -97,11 +105,16 @@ public class LibrairyRestClient {
                 .body("{ \"name\": \""+partId+"\", \"content\": \""+StringEscapeUtils.escapeJson(content)+"\", \"language\": \"en\"}")
                 .asString();
 
-        if ((response.getStatus() != 200) && (response.getStatus() != 201))  throw new RuntimeException("Http error: " + response.getStatus());
+        if ((response.getStatus() == 409)){
+            LOG.warn("Part already exists: " + partId);
 
-        addPartTodDocument(partId, docId);
+        }else if ((response.getStatus() != 200) && (response.getStatus() != 201)) {
+            throw new RuntimeException("Http error: " + response.getStatus());
+        }else{
+            addPartTodDocument(partId, docId);
+            LOG.info("created a new part in librairy: '" + partId + "'");
+        }
 
-        LOG.info("created a new part in librairy: '" + partId + "'");
         return response.getBody();
     }
 
