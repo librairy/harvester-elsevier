@@ -1,16 +1,15 @@
 FROM frolvlad/alpine-oraclejdk8:slim
 VOLUME /tmp
 RUN mkdir /librairy
-
+WORKDIR /librairy
 ADD http://backingdata.org/dri/library/3.1/DRIresources-3.1.tar.gz /librairy/driresources.tar.gz
-
 RUN set -x \
         && tar -zxvf driresources.tar.gz \
         && rm driresources.tar.gz \
         && chmod -R 777 /librairy/DRIresources-3.1
 
 ADD DRIconfig.properties /librairy/DRIconfig.properties
-ADD harvester-elsevier.one-jar.jar app.jar
+ADD harvester-elsevier.one-jar.jar /librairy/app.jar
 RUN sh -c 'touch /app.jar'
 #ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-jar","/app.jar"]
-ENTRYPOINT exec java $JAVA_OPTS -server -Done-jar.silent=true -jar /app.jar
+ENTRYPOINT exec java $JAVA_OPTS -server -Done-jar.silent=true -jar /librairy/app.jar

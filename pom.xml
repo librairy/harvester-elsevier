@@ -11,7 +11,7 @@
 
 	<groupId>org.librairy</groupId>
     <artifactId>harvester-elsevier</artifactId>
-    <version>1.0</version>
+    <version>1.8.0</version>
     <packaging>jar</packaging>
     <name>harvester-elsevier</name>
     <description>harvester elsevier</description>

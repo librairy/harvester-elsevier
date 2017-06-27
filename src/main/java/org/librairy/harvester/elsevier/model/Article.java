@@ -1,5 +1,8 @@
 package org.librairy.harvester.elsevier.model;
 
+import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -61,7 +64,8 @@ public class Article {
     }
 
     public String getFullContent() {
-        return fullContent;
+
+        return !Strings.isNullOrEmpty(abstractContent)? abstractContent + " " + StringUtils.substringAfter(fullContent, abstractContent) : fullContent;
     }
 
     public void setFullContent(String fullContent) {
