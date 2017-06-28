@@ -15,7 +15,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -31,7 +30,6 @@ public class JournalService {
     private final ElsevierRestClient elsevierClient;
     private final LibrairyRestClient librairyClient;
     private final ArticleService articleService;
-    private final PaperService paperService;
 
     public JournalService(Boolean rethoricalAnalysisEnabled){
 
@@ -40,7 +38,6 @@ public class JournalService {
 
         this.searchService  = new SearchService(elsevierClient);
         this.articleService = new ArticleService(elsevierClient);
-        this.paperService   = new PaperService(rethoricalAnalysisEnabled);
     }
 
 
@@ -70,7 +67,7 @@ public class JournalService {
                 index += size;
 
 
-                docs.parallelStream().forEach( eid -> {
+                docs.stream().forEach( eid -> {
                     try {
                         Article article = this.articleService.getByEID(eid);
 
@@ -78,21 +75,16 @@ public class JournalService {
                             counter.incrementAndGet();
 
                             // create a document in librairy
-                            librairyClient.createDocument(article.getEid(), article.getTitle(), article.getFullContent());
+                            librairyClient.createItem(article.getEid(), article.getTitle(), article.getFullContent());
 
                             // create a part containing the abstract from article in librairy
-                            librairyClient.createPart("abstract-" + article.getEid(), article.getEid(), article.getAbstractContent());
-
-
-                            for(Map.Entry<String,String> part : paperService.getParts(article.getEid(), article.getFullContent()).entrySet()){
-                                librairyClient.createPart(part.getKey()+"-" + article.getEid(), article.getEid(), part.getValue());
-                            }
+                            librairyClient.createPart("abstract", article.getEid(), article.getAbstractContent());
 
                             // annotate the document with keywords
-                            if (!article.getKeywords().isEmpty()) librairyClient.annotateDocument(article.getEid(), "keywords", article.getKeywords().stream().map(w -> w.replace(" ", "_")).collect(Collectors.joining(" ")));
+                            if (!article.getKeywords().isEmpty()) librairyClient.annotateItem(article.getEid(), "keywords", article.getKeywords().stream().map(w -> w.replace(" ", "_")).collect(Collectors.joining(" ")));
 
                             // add document to domain
-                            librairyClient.addDocumentToDomain(article.getEid(), id);
+                            librairyClient.addItemToDomain(article.getEid(), id);
 
                             // json serialize
                             if (downloadFiles) {
@@ -113,6 +105,7 @@ public class JournalService {
 
                 completed = (docs.size() < size) || (counter.get() >= maxDocs);
             }
+            librairyClient.updateTopics(id);
         } catch (IOException e) {
             LOG.error("Error getting articles from journal: '" + journal + "'", e);
         } catch (UnirestException e) {

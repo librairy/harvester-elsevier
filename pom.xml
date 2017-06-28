@@ -55,7 +55,6 @@
         <logback.version>1.1.3</logback.version>
         <maven-plugin-version>1.0.0</maven-plugin-version>
         <unirest.version>1.4.9</unirest.version>
-        <upf.version>3.1</upf.version>
     </properties>
 
     <dependencies>
@@ -106,27 +105,6 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>${guava.version}</version>
-        </dependency>
-
-        <!-- NLP Library -->
-        <dependency>
-            <groupId>edu.upf.taln.dri</groupId>
-            <artifactId>lib</artifactId>
-            <version>${upf.version}</version>
-            <!--<exclusions>-->
-                <!--<exclusion>-->
-                    <!--<groupId>log4j</groupId>-->
-                    <!--<artifactId>log4j</artifactId>-->
-                <!--</exclusion>-->
-                <!--<exclusion>-->
-                    <!--<groupId>org.slf4j</groupId>-->
-                    <!--<artifactId>slf4j-log4j12</artifactId>-->
-                <!--</exclusion>-->
-                <!--<exclusion>-->
-                    <!--<groupId>org.slf4j</groupId>-->
-                    <!--<artifactId>log4j-over-slf4j</artifactId>-->
-                <!--</exclusion>-->
-            <!--</exclusions>-->
         </dependency>
 
         <dependency>
@@ -235,11 +213,6 @@
                             <targetPath>/</targetPath>
                             <directory>${project.build.directory}</directory>
                             <include>${project.build.finalName}.one-jar.jar</include>
-                        </resource>
-                        <resource>
-                            <targetPath>/</targetPath>
-                            <directory>src/main/tools</directory>
-                            <include>**</include>
                         </resource>
                     </resources>
                     <forceTags>true</forceTags>

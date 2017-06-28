@@ -26,9 +26,10 @@ public class Application {
             "┬ ┬┌─┐┬─┐┬  ┬┌─┐┌─┐┌┬┐┌─┐┬─┐       ┌─┐┬  ┌─┐┌─┐┬  ┬┬┌─┐┬─┐\n" +
             "├─┤├─┤├┬┘└┐┌┘├┤ └─┐ │ ├┤ ├┬┘  ───  ├┤ │  └─┐├┤ └┐┌┘│├┤ ├┬┘\n" +
             "┴ ┴┴ ┴┴└─ └┘ └─┘└─┘ ┴ └─┘┴└─       └─┘┴─┘└─┘└─┘ └┘ ┴└─┘┴└─\n" +
-            "                                            v1.0\n" +
+            "                                            \n" +
             "\n" +
             "                      cbadenes@fi.upm.es\n" +
+            "                       ocorcho@fi.upm.es\n" +
             "                  Ontology Engineering Group\n" +
             "                             2017\n";
 
@@ -45,9 +46,6 @@ public class Application {
         String numPapersEnv            = System.getenv("NUM_PAPERS");
         String downloadPapersEnv       = System.getenv("DOWNLOAD_PAPERS");
 
-
-
-        System.setProperty("DRIconf","/librairy/DRIconfig.properties");
 
         System.setProperty(ElsevierRestClient.API_HOST, "api.elsevier.com");
 
